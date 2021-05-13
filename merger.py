@@ -4,6 +4,7 @@ import random
 import sys
 import os
 
+from duplicateRemover import DuplicateRemover
 
 class Merger:
 
@@ -21,6 +22,7 @@ class Merger:
         return [file.name for file in os.scandir(directory)]
 
     def merge(self):
+ 
         fDir = self.fDir
         dirDict = self.dirDict
 
@@ -65,3 +67,5 @@ if __name__ == "__main__":
 
     MergerInstance = Merger(finalDir, directories)
     MergerInstance.merge()
+    DRInstance = DuplicateRemover(finalDir)
+    DRInstance.remover()
