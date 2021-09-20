@@ -1,63 +1,69 @@
 import argparse
 import shutil
 import random
+import hashlib
 import sys
 import os
 
-from duplicateRemover import DuplicateRemover
-
 class Merger:
 
-    def __init__(self, fDir, dirList):
-        self.fDir = fDir
+    def __init__(self, finalDir, dirList):
+        self.finalDir = finalDir
         self.constructDirDict(dirList)
 
     def constructDirDict(self, dirList):
         dirDict = {}
         for directory in dirList:
-            dirDict[directory] = self.getFiles(directory)
+            dirDict[directory] = self.getFileList(directory)
         self.dirDict = dirDict
 
-    def getFiles(self, directory):
+    def getFileList(self, directory):
         return [file.name for file in os.scandir(directory)]
 
     def merge(self):
  
-        fDir = self.fDir
+        finalDir = self.finalDir
         dirDict = self.dirDict
 
-        self.handlefDir(fDir)
+        self.handlefinalDir(finalDir)
 
         for directory in dirDict:
             for file in dirDict[directory]:
 
                 initPath = f'{directory}/{file}'
-                finalPath = f'{fDir}/{file}'
+                finalPath = f'{finalDir}/{file}'
 
                 if not os.path.isfile(finalPath):
                     shutil.copyfile(initPath, finalPath)
                 else:
                     self.fileExistsHandle(initPath, finalPath, file)
 
-    def handlefDir(self, fDir):
-        if not os.path.exists(fDir):
-            os.makedirs(fDir)
+    # creates final dir if it doesn't exist
+    def handlefinalDir(self, finalDir):
+        if not os.path.exists(finalDir):
+            os.makedirs(finalDir)
 
+    # handles identical file validation
     def fileExistsHandle(self, initPath, finalPath, file):
-        f1size = os.stat(initPath).st_size
-        f2size = os.stat(finalPath).st_size
+        file1size = os.stat(initPath).st_size
+        file2size = os.stat(finalPath).st_size
 
-        if f1size != f2size:
+        if file1size != file2size:
             name, ext = file.split('.')
             rand = random.randint(1000, 9999)
-            fName = f'{self.fDir}/{name}_{rand}.{ext}'
+            finalPath = f'{self.finalDir}/{name}_{rand}.{ext}'
 
-            shutil.copyfile(initPath, fName)
+            shutil.copyfile(initPath, finalPath)
+
+        elif file1size == file2size: 
+            pass
+            
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Merge folders without worrying about duplication.')
     requiredNamed = parser.add_argument_group('Required named arguments')
+
     requiredNamed.add_argument('-fd', dest='final_directory', help='the final directory',required=True)
     requiredNamed.add_argument('-dir', nargs='+', dest='directories', help='the directories to be merged', required=True)
     args = parser.parse_args()
@@ -67,5 +73,3 @@ if __name__ == "__main__":
 
     MergerInstance = Merger(finalDir, directories)
     MergerInstance.merge()
-    DRInstance = DuplicateRemover(finalDir)
-    DRInstance.remover()
