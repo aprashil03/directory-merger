@@ -49,15 +49,34 @@ class Merger:
         file2size = os.stat(finalPath).st_size
 
         if file1size != file2size:
-            name, ext = file.split('.')
-            rand = random.randint(1000, 9999)
-            finalPath = f'{self.finalDir}/{name}_{rand}.{ext}'
-
-            shutil.copyfile(initPath, finalPath)
+            self.copyDuplicate(file, initPath, finalPath)
 
         elif file1size == file2size: 
-            pass
-            
+
+            filehashes = {}
+
+            sha256hash = hashlib.sha256()
+            with open(initPath, 'rb') as f:
+                sha256hash.update(f.read(4096))
+            filehashes["file1hash"] = sha256hash.hexdigest()
+
+            sha256hash = hashlib.sha256()
+            with open(finalPath, 'rb') as f:
+                sha256hash.update(f.read(4096))
+            filehashes["file2hash"] = sha256hash.hexdigest()
+
+            if filehashes["file2hash"] != filehashes["file1hash"]:
+                self.copyDuplicate(file, initPath, finalPath)
+                print(f"[SHA256 Verification] {file} successfully copied from {initPath} to {finalPath} \n{filehashes}")
+            else:
+                pass
+        
+    def copyDuplicate(self, file, initPath, finalPath):
+        name, ext = file.split('.')
+        rand = random.randint(1000, 9999)
+        finalPath = f'{self.finalDir}/{name}_{rand}.{ext}'
+
+        shutil.copyfile(initPath, finalPath)
 
 if __name__ == "__main__":
 
