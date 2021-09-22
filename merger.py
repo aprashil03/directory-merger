@@ -35,6 +35,8 @@ class Merger:
 
                 if not os.path.isfile(finalPath):
                     shutil.copyfile(initPath, finalPath)
+                    self.logging(initPath, "No verification needed.")
+
                 else:
                     self.fileExistsHandle(initPath, finalPath, file)
 
@@ -50,6 +52,8 @@ class Merger:
 
         if file1size != file2size:
             self.copyDuplicate(file, initPath, finalPath)
+            self.logging(initPath, "file size")
+
 
         elif file1size == file2size: 
 
@@ -67,7 +71,7 @@ class Merger:
 
             if filehashes["file2hash"] != filehashes["file1hash"]:
                 self.copyDuplicate(file, initPath, finalPath)
-                print(f"[SHA256 Verification] {file} successfully copied from {initPath} to {finalPath} \n{filehashes}")
+                self.logging(initPath, "sha256 checksum")
             else:
                 pass
         
@@ -77,6 +81,9 @@ class Merger:
         finalPath = f'{self.finalDir}/{name}_{rand}.{ext}'
 
         shutil.copyfile(initPath, finalPath)
+
+    def logging(self, initPath, verification):
+        print(f"Successfully Copied {initPath} | verification used: {verification}")
 
 if __name__ == "__main__":
 
