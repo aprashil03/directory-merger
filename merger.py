@@ -7,8 +7,9 @@ import os
 
 class Merger:
 
-    def __init__(self, finalDir, dirList):
+    def __init__(self, finalDir, dirList, hashsize=4098):
         self.finalDir = finalDir
+        self.hashsize = hashsize
         self.constructDirDict(dirList)
 
     def constructDirDict(self, dirList):
@@ -61,12 +62,12 @@ class Merger:
 
             sha256hash = hashlib.sha256()
             with open(initPath, 'rb') as f:
-                sha256hash.update(f.read(4096))
+                sha256hash.update(f.read(self.hashsize))
             filehashes["file1hash"] = sha256hash.hexdigest()
 
             sha256hash = hashlib.sha256()
             with open(finalPath, 'rb') as f:
-                sha256hash.update(f.read(4096))
+                sha256hash.update(f.read(self.hashsize))
             filehashes["file2hash"] = sha256hash.hexdigest()
 
             if filehashes["file2hash"] != filehashes["file1hash"]:
@@ -92,10 +93,15 @@ if __name__ == "__main__":
 
     requiredNamed.add_argument('-fd', dest='final_directory', help='the final directory',required=True)
     requiredNamed.add_argument('-dir', nargs='+', dest='directories', help='the directories to be merged', required=True)
+
+    requiredNamed = parser.add_argument_group('Optional Arguments')
+    requiredNamed.add_argument('-hs', nargs='+', dest='hashsize', help='sha256hash bit size', required=False)
+
     args = parser.parse_args()
 
     finalDir = args.final_directory
     directories = args.directories
+    hashsize = int(args.hashsize[0])
 
-    MergerInstance = Merger(finalDir, directories)
+    MergerInstance = Merger(finalDir, directories, hashsize)
     MergerInstance.merge()
