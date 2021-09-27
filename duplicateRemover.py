@@ -9,6 +9,7 @@ class DuplicateRemover:
         checkSums = self.getCheckSums(dir, files)
         self.dir = dir
         self.zipped = [i for i in zip(files, checkSums)]
+        self.deletionFiles = self.prepareDeletion()
 
     def getFiles(self, dir):
         return [file.name for file in os.scandir(dir)]
@@ -22,7 +23,7 @@ class DuplicateRemover:
             checkSums.append(sha256hash.hexdigest())
         return checkSums
 
-    def remover(self):
+    def prepareDeletion(self):
 
         dir = self.dir
         zipped = self.zipped
@@ -31,10 +32,18 @@ class DuplicateRemover:
         toDelete = []
 
         for i in zipped:
-            if i[1] in iteratedElements:
-                toDelete.append(i[0])
-            else:
+            if i[1] not in iteratedElements:
                 iteratedElements.append(i[1])
+            else:
+                toDelete.append(i)
 
-        for file in toDelete:
-            os.remove(f"{dir}/{file}")
+        return toDelete
+
+    def deleteFiles(self):
+
+        dir = self.dir
+        deletionFiles = self.deletionFiles
+
+        for file in deletionFiles:
+            os.remove(f"{dir}/{file[0]}")
+
