@@ -1,7 +1,6 @@
 import hashlib
 import os
 
-
 class DuplicateRemover:
 
     def __init__(self, dir):
