@@ -5,6 +5,8 @@ import hashlib
 import sys
 import os
 
+from duplicateRemover import DuplicateRemover
+
 class Merger:
 
     def __init__(self, finalDir, dirList, hashsize=4098):
@@ -95,13 +97,21 @@ if __name__ == "__main__":
     requiredNamed.add_argument('-dir', nargs='+', dest='directories', help='the directories to be merged', required=True)
 
     requiredNamed = parser.add_argument_group('Optional Arguments')
-    requiredNamed.add_argument('-hs', nargs='+', dest='hashsize', help='sha256hash bit size', required=False)
+    requiredNamed.add_argument('-hs', dest='hashsize', help='sha256hash bit size', type=int, required=False)
+    requiredNamed.add_argument('-rd', action="store_true", dest='removedup', help='remove duplicates', required=False)
 
     args = parser.parse_args()
 
     finalDir = args.final_directory
     directories = args.directories
-    hashsize = int(args.hashsize[0])
+    hashsize = args.hashsize
+    removeDup = args.removedup
 
     MergerInstance = Merger(finalDir, directories, hashsize)
     MergerInstance.merge()
+
+    DuplicateRemoverInstance = DuplicateRemover(finalDir)
+
+    if removeDup:
+        DuplicateRemoverInstance.deleteFiles()
+        print("\nDuplicate files have been deleted.")

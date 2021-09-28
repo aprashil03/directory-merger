@@ -37,6 +37,10 @@ class DuplicateRemover:
             else:
                 toDelete.append(i)
 
+        if toDelete:
+            print("\nThe following duplicate files have been found.\n")
+            _ = [print(f"[{i[0]}] {i[1]}") for i in toDelete]
+
         return toDelete
 
     def deleteFiles(self):
@@ -46,4 +50,3 @@ class DuplicateRemover:
 
         for file in deletionFiles:
             os.remove(f"{dir}/{file[0]}")
-
